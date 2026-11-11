@@ -1,0 +1,8 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {validateArtwork,validateFile} from '../src/model.js';
+const valid={title:'New work',status:'available',category:'catalogue',year:'2026',price:'250000',published:false};
+test('blank price stays price on enquiry; draft stays private',()=>{const result=validateArtwork({...valid,price:''});assert.equal(result.price,null);assert.equal(result.published,false)});
+test('zero price is retained and numeric strings normalised',()=>{assert.equal(validateArtwork({...valid,price:'0'}).price,0);assert.equal(validateArtwork(valid).year,2026)});
+test('invalid prices and years are rejected',()=>{for(const price of ['NaN','-1','Infinity','1000000001'])assert.throws(()=>validateArtwork({...valid,price}));for(const year of ['1899','2101','2026.5'])assert.throws(()=>validateArtwork({...valid,year}))});
+test('blank titles, unknown states and oversized descriptions are rejected',()=>{assert.throws(()=>validateArtwork({...valid,title:' '}));assert.throws(()=>validateArtwork({...valid,status:'pending'}));assert.throws(()=>validateArtwork({...valid,description:'x'.repeat(5001)}))});
+test('HTML text remains plain data, never interpreted as markup',()=>{assert.equal(validateArtwork({...valid,title:'<img src=x onerror=alert(1)>'}).title,'<img src=x onerror=alert(1)>')});
+test('SVG, empty and oversized uploads are rejected',()=>{assert.throws(()=>validateFile({type:'image/svg+xml',size:100}));assert.throws(()=>validateFile({type:'image/jpeg',size:0}));assert.throws(()=>validateFile({type:'image/png',size:16*1024*1024}));assert.doesNotThrow(()=>validateFile({type:'image/webp',size:100}))});
