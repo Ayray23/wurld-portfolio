@@ -124,3 +124,24 @@ document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{
  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t===b));
  $("#artworks-view").hidden=b.dataset.tab!=="artworks";$("#enquiries-view").hidden=b.dataset.tab!=="enquiries";
 }));
+
+const originalCatalogue=[
+ {id:"legacy-series",imageUrl:"assets/image-74.webp",title:"Last Song of the Night",description:"A reflection on Wurld's journey, imagination and the beauty of life.",category:"series",sortOrder:0,year:2026,medium:"",dimensions:"",price:0},
+ {id:"legacy-fashion",imageUrl:"assets/image-5.webp",title:"The Fashion",description:"An exploration of fashion, confidence and personal identity.",category:"featured",sortOrder:1,year:2026,medium:"Oil on canvas",dimensions:"20 × 30 in",price:500000},
+ {id:"legacy-02",imageUrl:"assets/image-86.webp",title:"Artwork 02",description:"Original painting by Wurld.",category:"catalogue",sortOrder:2,year:2026,medium:"",dimensions:"",price:0},
+ {id:"legacy-03",imageUrl:"assets/image-90.webp",title:"Artwork 03",description:"Original painting by Wurld.",category:"catalogue",sortOrder:3,year:2026,medium:"",dimensions:"",price:0},
+ {id:"legacy-04",imageUrl:"assets/image-94.webp",title:"Artwork 04",description:"Original painting by Wurld.",category:"catalogue",sortOrder:4,year:2026,medium:"",dimensions:"",price:0}
+];
+$("#import-original").addEventListener("click",async()=>{
+ if(!user||!confirm("Import the five existing portfolio works? Existing imported records will be skipped."))return;
+ const button=$("#import-original");button.disabled=true;button.textContent="Importing...";
+ try{
+  for(const w of originalCatalogue){
+   const reference=doc(db,"artworks",w.id);
+   if((await getDoc(reference)).exists())continue;
+   await setDoc(reference,{...w,altText:w.title,imagePath:"",status:"available",published:true,createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
+  }
+  alert("Original artwork gallery imported. You can edit each painting in the dashboard.");
+ }catch(e){alert("Migration stopped: "+errorMessage(e))}
+ finally{button.disabled=false;button.textContent="Import original gallery"}
+});
