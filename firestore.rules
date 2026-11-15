@@ -31,6 +31,34 @@ service cloud.firestore {
     allow create,update: if artist() && artworkFields();
     allow delete: if artist();
   }
+  match /settings/{id} {
+    allow get: if id == "site" || artist();
+    allow list: if artist();
+    allow create, update: if id == "site" && artist() &&
+      request.resource.data.keys().hasOnly([
+        'hero','bio','commissionPrice','whatsapp','email','catalogueLive','updatedAt'
+      ]) &&
+      request.resource.data.hero is string &&
+      request.resource.data.hero.size() <= 350 &&
+      request.resource.data.bio is string &&
+      request.resource.data.bio.size() <= 900 &&
+      request.resource.data.commissionPrice is number &&
+      request.resource.data.commissionPrice >= 0 &&
+      request.resource.data.whatsapp is string &&
+      request.resource.data.whatsapp.matches('^[0-9]{9,16}
+    allow read,update,delete: if artist();
+    // Enquiries are created ONLY by the App Check protected Cloud Function.
+    // The Admin SDK bypasses these browser rules on the trusted server.
+    allow create: if false;
+  }
+  match /{document=**} { allow read,write: if false; }
+ }
+}) &&
+      request.resource.data.email is string &&
+      request.resource.data.email.size() <= 254 &&
+      request.resource.data.catalogueLive is bool;
+    allow delete: if false;
+  }
   match /enquiries/{id} {
     allow read,update,delete: if artist();
     // Public submission requires validated fields, but a public endpoint still
