@@ -5,8 +5,9 @@ import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/fireba
 const $=s=>document.querySelector(s), login=$("#login"), app=$("#app"), setup=$("#setup");
 const loginStatus=$("#login-status"), saveStatus=$("#save-status"), editor=$("#editor");
 const text=(tag,value,cls)=>{const e=document.createElement(tag);e.textContent=value??"";if(cls)e.className=cls;return e};
-let user=null,artworks=[],enquiries=[],stopArt=null,stopEnq=null;
-function resetListeners(){stopArt?.();stopEnq?.();stopArt=stopEnq=null}
+let user=null,artworks=[],enquiries=[],stopArt=null,stopEnq=null,stopSettings=null;
+let currentSettings={};
+function resetListeners(){stopArt?.();stopEnq?.();stopSettings?.();stopArt=stopEnq=stopSettings=null}
 function errorMessage(e){return (e?.message||String(e)).replace(/^Firebase:\s*/,"")}
 if(!auth||!db||!storage){setup.hidden=false;login.hidden=true}
 else {
@@ -22,6 +23,15 @@ else {
      artworks.sort((a,b)=>(Number(a.sortOrder)||0)-(Number(b.sortOrder)||0));
      renderArtworks();
    },e=>{$("#artwork-list").textContent="Unable to load artworks: "+errorMessage(e)});
+   stopSettings=onSnapshot(doc(db,"settings","site"),snap=>{
+    currentSettings=snap.exists()?snap.data():{};
+    $("#setting-hero").value=currentSettings.hero||"";
+    $("#setting-bio").value=currentSettings.bio||"";
+    $("#setting-commission").value=currentSettings.commissionPrice??200000;
+    $("#setting-whatsapp").value=currentSettings.whatsapp||"2349067792950";
+    $("#setting-email").value=currentSettings.email||"adeniyiw123@gmail.com";
+    $("#setting-catalogue-live").checked=Boolean(currentSettings.catalogueLive);
+   },e=>{$("#settings-status").textContent="Unable to load website settings: "+errorMessage(e)});
    stopEnq=onSnapshot(collection(db,"enquiries"),snap=>{
     enquiries=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));renderEnquiries();
    },e=>{$("#enquiry-list").textContent="Unable to load enquiries: "+errorMessage(e)});
@@ -122,7 +132,7 @@ function renderEnquiries(){
 }
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{
  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t===b));
- $("#artworks-view").hidden=b.dataset.tab!=="artworks";$("#enquiries-view").hidden=b.dataset.tab!=="enquiries";
+ $("#artworks-view").hidden=b.dataset.tab!=="artworks";$("#enquiries-view").hidden=b.dataset.tab!=="enquiries";$("#settings-view").hidden=b.dataset.tab!=="settings";
 }));
 
 const originalCatalogue=[
@@ -141,7 +151,26 @@ $("#import-original").addEventListener("click",async()=>{
    if((await getDoc(reference)).exists())continue;
    await setDoc(reference,{...w,altText:w.title,imagePath:"",status:"available",published:true,createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
   }
-  alert("Original artwork gallery imported. You can edit each painting in the dashboard.");
+  await setDoc(doc(db,"settings","site"),{...currentSettings,hero:currentSettings.hero||"",bio:currentSettings.bio||"",commissionPrice:currentSettings.commissionPrice??200000,whatsapp:currentSettings.whatsapp||"2349067792950",email:currentSettings.email||"adeniyiw123@gmail.com",catalogueLive:true,updatedAt:serverTimestamp()});
+  alert("Original artwork gallery imported and CMS catalogue activated.");
  }catch(e){alert("Migration stopped: "+errorMessage(e))}
  finally{button.disabled=false;button.textContent="Import original gallery"}
+});
+
+$("#settings-form").addEventListener("submit",async event=>{
+ event.preventDefault();if(!user)return;
+ const status=$("#settings-status"),whatsapp=$("#setting-whatsapp").value.replace(/\D/g,""),email=$("#setting-email").value.trim();
+ if(!/^\d{9,16}$/.test(whatsapp)){status.textContent="Enter a valid international WhatsApp number (digits only).";return}
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){status.textContent="Enter a valid contact email.";return}
+ const button=event.submitter;button.disabled=true;status.textContent="Saving site settings...";
+ try{
+  await setDoc(doc(db,"settings","site"),{
+   hero:$("#setting-hero").value.trim(),bio:$("#setting-bio").value.trim(),
+   commissionPrice:Number($("#setting-commission").value)||0,whatsapp,email,
+   catalogueLive:$("#setting-catalogue-live").checked,
+   updatedAt:serverTimestamp()
+  });
+  status.textContent="Website settings saved and published.";
+ }catch(e){status.textContent=errorMessage(e)}
+ finally{button.disabled=false}
 });
