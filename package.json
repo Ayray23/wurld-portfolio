@@ -5,7 +5,8 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "node --test tests/*.test.mjs",
-    "check": "npm run test && npm run build"
+    "check": "npm run lint && npm run test && npm run build",
+    "lint": "node --check app.js && node --check admin.js && node --check cms-public.js && node --check cms-enquiry.js && node --check firebase-client.js && node --check functions/index.js && node --check scripts/build.mjs"
   },
   "engines": {
     "node": ">=20"
