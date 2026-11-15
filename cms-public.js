@@ -16,7 +16,7 @@ function renderGallery(){
  const works=currentWorks;
  const activate=works.length>0||settings.catalogueLive===true;
  if(!activate){
-  if(dynamic){gallery.innerHTML=originalGallery;dynamic=false}
+  if(dynamic){gallery.innerHTML=originalGallery;dynamic=false;window.WurldPortfolio?.restoreWorks()}
   return;
  }
  dynamic=true;
