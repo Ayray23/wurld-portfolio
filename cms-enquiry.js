@@ -9,6 +9,7 @@ else {
   if(event.submitter?.value!=="studio")return;
   event.preventDefault();
   if(!form.reportValidity())return;
+  if(!form.querySelector("#studio-consent").checked){status.textContent="Please agree to the privacy notice before sending to the studio inbox.";return}
   const email=form.querySelector('[name="email"]').value.trim();
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
    status.textContent="Enter a valid email so the artist can reply to your enquiry.";return;
@@ -20,7 +21,7 @@ else {
     name:String(data.get("name")||"").trim(),email,
     interest:String(data.get("interest")||""),
     message:String(data.get("message")||"").trim(),
-    artworkId:"",website:String(data.get("website")||"")
+    artworkId:"",consent:true,website:String(data.get("website")||"")
    });
    status.textContent="Your enquiry was received by Wurld Studio. You can expect a reply using the email provided.";
    form.reset();
