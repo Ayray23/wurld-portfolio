@@ -11,7 +11,7 @@
 - Collector inbox with request statuses: new, contacted and closed.
 - App Check-protected Cloud Function for public website enquiries, with request validation and per-IP hourly rate limit.
 - Static fallback if Firebase configuration is missing.
-- Basic zero-dependency tests and GitHub Actions checks.
+- JavaScript syntax/build tests and Firestore Emulator authorization tests in GitHub Actions.
 
 ## 1. Configure Firebase
 
@@ -78,7 +78,7 @@ This runs static regression tests and builds `dist/`. For a complete end-to-end 
 ## Operational notes
 
 - The `published` switch controls catalogue visibility. If `catalogueLive` is false and there are no published records, the old static gallery is retained.
-- Deleting artwork documents does not currently delete uploaded files. Delete unused media from the Firebase Storage Console after checking whether it is used elsewhere.
+- Cloud Functions automatically remove storage images when their artwork is deleted or its image is replaced, for files uploaded through this dashboard. Original static assets and manually entered external image URLs are not deleted. Verify the cleanup triggers are deployed with the other functions.
 - Set Firebase billing alerts and enable backups / periodic exports. Firebase budget alerts do not automatically cap spending.
 - Firebase Web App configuration is safe to expose; service-account keys and private tokens are **not**.
 - No Firebase project, privileged artist identity, actual email delivery or hosted production release is generated automatically by these source-code changes.
