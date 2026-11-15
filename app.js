@@ -13,8 +13,8 @@ const works=[
 const dialog=document.querySelector('#lightbox');let active=0,returnFocus=null,previousHash='';
 function drawArtwork(){const w=works[active];document.querySelector('#art-image').src=w.image;document.querySelector('#art-image').alt=w.title;document.querySelector('#art-heading').textContent=w.title;document.querySelector('#art-description').textContent=w.description;document.querySelector('#art-facts').replaceChildren();w.facts.forEach(([key,value])=>{const row=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=key;dd.textContent=value;row.append(dt,dd);document.querySelector('#art-facts').append(row)});document.querySelector('#art-position').textContent=`${active+1} / ${works.length}`;document.querySelector('#art-enquire').href='https://wa.me/'+window.WurldPortfolio.whatsapp+'?text='+encodeURIComponent(`Hello Wurld, I’m interested in ${w.title}. Could you confirm the details and availability?`);document.querySelector('#art-share-status').textContent='';history.replaceState(null,'','#artwork-'+w.id)}
 function openArtwork(index){if(index<0)return;active=index;if(!dialog.open){returnFocus=document.activeElement;previousHash=location.hash.startsWith('#artwork-')?'#collect':location.hash;dialog.showModal();document.body.classList.add('modal-open')}drawArtwork()}
-document.querySelectorAll('.art-open').forEach(b=>b.addEventListener('click',()=>openArtwork(works.findIndex(w=>w.image===b.dataset.image))));
-document.querySelectorAll('.details-trigger').forEach(b=>b.addEventListener('click',()=>openArtwork(works.findIndex(w=>w.id===b.dataset.art))));
+document.querySelectorAll('.art-open:not(#collect .art-open)').forEach(b=>b.addEventListener('click',()=>openArtwork(works.findIndex(w=>w.image===b.dataset.image))));
+
 document.querySelector('#close').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
 dialog.addEventListener('close',()=>{document.body.classList.remove('modal-open');history.replaceState(null,'',location.pathname+location.search+previousHash);returnFocus?.focus()});
 function step(d){active=(active+d+works.length)%works.length;drawArtwork()}
@@ -30,9 +30,11 @@ const form=document.querySelector('#enquiry-form');form.addEventListener('submit
 const links=[...document.querySelectorAll('.desktop-links a')];const observer=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting)links.forEach(a=>{if(a.hash==='#'+entry.target.id)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current')})})},{rootMargin:'-15% 0px -60% 0px'});document.querySelectorAll('main>section[id]').forEach(s=>observer.observe(s));
 
 /* CMS gallery uses delegated events so artwork added after initial load opens correctly. */
+const originalWorks=works.map(w=>({...w,facts:w.facts.map(f=>[...f])}));
 window.WurldPortfolio={
  whatsapp:'2349067792950',
  setWhatsapp(value){this.whatsapp=value},
+ restoreWorks(){works.splice(0,works.length,...originalWorks)},
  setWorks(items){
    works.splice(0,works.length,...items);
    if(dialog.open)dialog.close();
@@ -40,8 +42,8 @@ window.WurldPortfolio={
  }
 };
 document.querySelector('#collect .gallery').addEventListener('click',event=>{
- const button=event.target.closest('button[data-cms-id]');
+ const button=event.target.closest('button.art-open,button.details-trigger');
  if(!button)return;
- const index=works.findIndex(w=>w.id===button.dataset.cmsId);
+ const index=button.dataset.cmsId?works.findIndex(w=>w.id===button.dataset.cmsId):button.dataset.art?works.findIndex(w=>w.id===button.dataset.art):works.findIndex(w=>w.image===button.dataset.image);
  if(index>=0)openArtwork(index);
 });
