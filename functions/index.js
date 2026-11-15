@@ -12,6 +12,7 @@ export const submitEnquiry=onCall({
 },async request=>{
  const raw=request.data||{};
  if(raw.website)throw new HttpsError("invalid-argument","Invalid submission");
+ if(raw.consent!==true)throw new HttpsError("failed-precondition","Consent is required");
  if(!isText(raw.name,2,100)||!isText(raw.email,5,254)||
     !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw.email)||
     !isText(raw.interest,2,120)||!isText(raw.message,10,2000)||
@@ -30,7 +31,7 @@ export const submitEnquiry=onCall({
   transaction.create(contact,{
     name:raw.name.trim(),email:raw.email.trim().toLowerCase(),
     interest:raw.interest.trim(),message:raw.message.trim(),
-    artworkId:String(raw.artworkId||"").trim(),status:"new",createdAt:FieldValue.serverTimestamp()
+    artworkId:String(raw.artworkId||"").trim(),status:"new",consentAt:FieldValue.serverTimestamp(),createdAt:FieldValue.serverTimestamp()
   });
  });
  return {success:true,id:contact.id};
