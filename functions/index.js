@@ -1,5 +1,7 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { initializeApp } from "firebase-admin/app";
+import { getStorage } from "firebase-admin/storage";
+import { onDocumentDeleted, onDocumentUpdated } from "firebase-functions/v2/firestore";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { createHash } from "node:crypto";
 
@@ -35,4 +37,23 @@ export const submitEnquiry=onCall({
   });
  });
  return {success:true,id:contact.id};
+});
+
+async function cleanReplacedImage(path) {
+ if(typeof path!=="string"||!/^artworks\/[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+\.(jpg|jpeg|png|webp)$/.test(path))return;
+ try{await getStorage().bucket().file(path).delete({ignoreNotFound:true})}
+ catch(error){console.warn("Artwork image cleanup failed:",path,error.message)}
+}
+export const deleteArtworkImage=onDocumentDeleted({
+ document:"artworks/{artworkId}",region:"europe-west1"
+},async event=>{
+ const artwork=event.data?.data();
+ await cleanReplacedImage(artwork?.imagePath);
+});
+export const removeOldArtworkImage=onDocumentUpdated({
+ document:"artworks/{artworkId}",region:"europe-west1"
+},async event=>{
+ const before=event.data?.before.data(),after=event.data?.after.data();
+ if(before?.imagePath&&before.imagePath!==after?.imagePath)
+  await cleanReplacedImage(before.imagePath);
 });
