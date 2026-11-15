@@ -16,6 +16,6 @@ test("no admin secrets in Firebase browser configuration",()=>{
  assert.doesNotMatch(read("firebase-client.js"),/serviceAccountKey/);
 });
 test("security rules default deny unspecified documents",()=>{
- assert.match(read("firestore.rules"),/match \/\{document=\*\*\} \{ allow read,write: if false; \}/);
+ assert.match(read("firestore.rules"),/match \/\{document=\*\*\} \{[\\s\\S]*?allow read, write: if false;/);
  assert.match(read("firestore.rules"),/match \/admins\/\{uid\}/);
 });
