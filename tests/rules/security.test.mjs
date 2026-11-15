@@ -2,6 +2,7 @@ import test,{before,after} from "node:test";
 import {readFileSync} from "node:fs";
 import {initializeTestEnvironment,assertSucceeds,assertFails} from "@firebase/rules-unit-testing";
 import {doc,setDoc,getDoc,getDocs,updateDoc,collection,query,where} from "firebase/firestore";
+import {ref,uploadString} from "firebase/storage";
 let env;
 const projectId="demo-wurld";
 const art={
@@ -13,7 +14,8 @@ const art={
 before(async()=>{
  env=await initializeTestEnvironment({
   projectId,
-  firestore:{rules:readFileSync(new URL("../../firestore.rules",import.meta.url),"utf8")}
+  firestore:{rules:readFileSync(new URL("../../firestore.rules",import.meta.url),"utf8")},
+  storage:{rules:readFileSync(new URL("../../storage.rules",import.meta.url),"utf8")}
  });
  await env.withSecurityRulesDisabled(async ctx=>{
   const db=ctx.firestore();
@@ -61,4 +63,15 @@ test("website enquiries are created on trusted backend only",async()=>{
  await assertFails(setDoc(doc(guest,"enquiries","spam"),{
   name:"Spammer",email:"x@example.com",interest:"Art",message:"Buy all art now",artworkId:"",status:"new"
  }));
+});
+
+test("storage uploads require artist approval and permitted image type",async()=>{
+ const artistStorage=env.authenticatedContext("artist-uid").storage();
+ const visitorStorage=env.authenticatedContext("visitor").storage();
+ const publicStorage=env.unauthenticatedContext().storage();
+ const name="artworks/artist-uid/test-123.webp";
+ await assertSucceeds(uploadString(ref(artistStorage,name),"test image","raw",{contentType:"image/webp"}));
+ await assertFails(uploadString(ref(visitorStorage,"artworks/visitor/test.jpg"),"test image","raw",{contentType:"image/jpeg"}));
+ await assertFails(uploadString(ref(artistStorage,"artworks/artist-uid/unsafe.svg"),"<svg/>","raw",{contentType:"image/svg+xml"}));
+ await assertFails(uploadString(ref(publicStorage,"artworks/artist-uid/anonymous.jpg"),"test image","raw",{contentType:"image/jpeg"}));
 });
