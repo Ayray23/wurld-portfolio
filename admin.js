@@ -127,6 +127,8 @@ function renderEnquiries(){
   for(const status of statuses){const button=text("button",status);button.disabled=q.status===status;button.addEventListener("click",async()=>{
    try{await updateDoc(doc(db,"enquiries",q.id),{status})}catch(e){alert(errorMessage(e))}
   });actions.append(button)}
+  const reply=text("a","Reply by email");reply.href="mailto:"+encodeURIComponent(q.email||"")+"?subject="+encodeURIComponent("Re: Wurld portfolio enquiry");reply.target="_blank";reply.rel="noopener";actions.append(reply);
+  const del=text("button","Delete","danger");del.addEventListener("click",async()=>{if(!confirm("Delete this enquiry permanently?"))return;try{await deleteDoc(doc(db,"enquiries",q.id))}catch(e){alert(errorMessage(e))}});actions.append(del);
   row.append(actions);list.append(row);
  });
 }
@@ -174,3 +176,17 @@ $("#settings-form").addEventListener("submit",async event=>{
  }catch(e){status.textContent=errorMessage(e)}
  finally{button.disabled=false}
 });
+
+function csvExport(filename,columns,items){
+ const escape=value=>'"'+String(value??"").replaceAll('"','""').replace(/\r?\n/g," ")+'"';
+ const rows=[columns.map(escape).join(","),...items.map(row=>columns.map(key=>escape(row[key])).join(","))];
+ const file=new Blob(["\uFEFF"+rows.join("\r\n")],{type:"text/csv;charset=utf-8"});
+ const url=URL.createObjectURL(file),link=document.createElement("a");
+ link.href=url;link.download=filename;document.body.append(link);link.click();link.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+$("#export-artworks").addEventListener("click",()=>csvExport("wurld-artworks.csv",
+ ["id","title","year","medium","dimensions","price","category","status","published","sortOrder","imageUrl","description"],artworks));
+$("#export-enquiries").addEventListener("click",()=>csvExport("wurld-enquiries.csv",
+ ["id","name","email","interest","message","artworkId","status"],
+ enquiries.map(({createdAt,...rest})=>rest)));
