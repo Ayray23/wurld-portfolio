@@ -2,7 +2,7 @@ import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 const root=resolve(import.meta.dirname,".."),dist=resolve(root,"dist");
 rmSync(dist,{recursive:true,force:true});mkdirSync(dist,{recursive:true});
-for(const name of ["index.html","admin.html","robots.txt","sitemap.xml","style.css","admin.css","app.js","admin.js","cms-public.js","cms-enquiry.js","firebase-client.js"]){
+for(const name of ["index.html","admin.html","privacy.html","robots.txt","sitemap.xml","style.css","admin.css","app.js","admin.js","cms-public.js","cms-enquiry.js","firebase-client.js"]){
  if(!existsSync(resolve(root,name)))throw new Error("Missing public file: "+name);
  cpSync(resolve(root,name),resolve(dist,name));
 }
