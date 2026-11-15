@@ -138,11 +138,11 @@ document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{
 }));
 
 const originalCatalogue=[
- {id:"legacy-series",imageUrl:"assets/image-74.webp",title:"Last Song of the Night",description:"A reflection on Wurld's journey, imagination and the beauty of life.",category:"series",sortOrder:0,year:2026,medium:"",dimensions:"",price:0},
- {id:"legacy-fashion",imageUrl:"assets/image-5.webp",title:"The Fashion",description:"An exploration of fashion, confidence and personal identity.",category:"featured",sortOrder:1,year:2026,medium:"Oil on canvas",dimensions:"20 × 30 in",price:500000},
- {id:"legacy-02",imageUrl:"assets/image-86.webp",title:"Artwork 02",description:"Original painting by Wurld.",category:"catalogue",sortOrder:2,year:2026,medium:"",dimensions:"",price:0},
- {id:"legacy-03",imageUrl:"assets/image-90.webp",title:"Artwork 03",description:"Original painting by Wurld.",category:"catalogue",sortOrder:3,year:2026,medium:"",dimensions:"",price:0},
- {id:"legacy-04",imageUrl:"assets/image-94.webp",title:"Artwork 04",description:"Original painting by Wurld.",category:"catalogue",sortOrder:4,year:2026,medium:"",dimensions:"",price:0}
+ {id:"series",imageUrl:"assets/image-74.webp",title:"Last Song of the Night",description:"A reflection on Wurld's journey, imagination and the beauty of life.",category:"series",sortOrder:0,year:2026,medium:"",dimensions:"",price:0},
+ {id:"01",imageUrl:"assets/image-5.webp",title:"The Fashion",description:"An exploration of fashion, confidence and personal identity.",category:"featured",sortOrder:1,year:2026,medium:"Oil on canvas",dimensions:"20 × 30 in",price:500000},
+ {id:"02",imageUrl:"assets/image-86.webp",title:"Artwork 02",description:"Original painting by Wurld.",category:"catalogue",sortOrder:2,year:2026,medium:"",dimensions:"",price:0},
+ {id:"03",imageUrl:"assets/image-90.webp",title:"Artwork 03",description:"Original painting by Wurld.",category:"catalogue",sortOrder:3,year:2026,medium:"",dimensions:"",price:0},
+ {id:"04",imageUrl:"assets/image-94.webp",title:"Artwork 04",description:"Original painting by Wurld.",category:"catalogue",sortOrder:4,year:2026,medium:"",dimensions:"",price:0}
 ];
 $("#import-original").addEventListener("click",async()=>{
  if(!user||!confirm("Import the five existing portfolio works? Existing imported records will be skipped."))return;
