@@ -28,3 +28,18 @@ document.querySelector('#share-site').addEventListener('click',async()=>{const u
 document.querySelectorAll('.filter').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('.filter').forEach(b=>{const on=b===button;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on))});let count=0;document.querySelectorAll('#collect .card').forEach(card=>{card.hidden=button.dataset.filter!=='all'&&card.dataset.category!==button.dataset.filter;if(!card.hidden)count++});document.querySelector('#gallery-count').textContent=`${count} ${count===1?'work':'works'}`}));
 const form=document.querySelector('#enquiry-form');form.addEventListener('submit',e=>{e.preventDefault();if(!form.reportValidity())return;const data=new FormData(form),name=String(data.get('name')).trim(),message=String(data.get('message')).trim();if(!name||message.length<10){document.querySelector('#form-status').textContent='Please enter your name and at least 10 characters describing your enquiry.';return}const interest=data.get('interest'),body=`Hello Wurld, my name is ${name}.\n\nI’m interested in: ${interest}.\n\n${message}`,email=e.submitter?.value==='email',url=email?'mailto:adeniyiw123@gmail.com?subject='+encodeURIComponent('Portfolio enquiry: '+interest)+'&body='+encodeURIComponent(body):'https://wa.me/2349067792950?text='+encodeURIComponent(body);const status=document.querySelector('#form-status');status.replaceChildren();status.append('Your message is ready. Review it and press Send in '+(email?'your email app. ':'WhatsApp. '));const link=document.createElement('a');link.href=url;link.textContent=email?'Open email draft again ↗':'Open WhatsApp draft again ↗';if(!email){link.target='_blank';link.rel='noopener'}status.append(link);if(email)location.href=url;else window.open(url,'_blank','noopener,noreferrer')});
 const links=[...document.querySelectorAll('.desktop-links a')];const observer=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting)links.forEach(a=>{if(a.hash==='#'+entry.target.id)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current')})})},{rootMargin:'-15% 0px -60% 0px'});document.querySelectorAll('main>section[id]').forEach(s=>observer.observe(s));
+
+/* CMS gallery uses delegated events so artwork added after initial load opens correctly. */
+window.WurldPortfolio={
+ setWorks(items){
+   works.splice(0,works.length,...items);
+   if(dialog.open)dialog.close();
+   if(location.hash.startsWith('#artwork-'))openFromHash();
+ }
+};
+document.querySelector('#collect .gallery').addEventListener('click',event=>{
+ const button=event.target.closest('button[data-cms-id]');
+ if(!button)return;
+ const index=works.findIndex(w=>w.id===button.dataset.cmsId);
+ if(index>=0)openArtwork(index);
+});
