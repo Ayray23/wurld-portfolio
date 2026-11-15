@@ -21,5 +21,6 @@ if(!complete)console.warn("Firebase environment not configured: static public ga
 writeFileSync(resolve(dist,"firebase-config.js"),
  "// Generated from Vercel environment variables. These Firebase Web App values are public.\n"+
  "export const firebaseConfig = "+JSON.stringify(config,null,2)+";\n"+
- "export const firebaseConfigured = "+String(complete)+";\n");
+ "export const firebaseConfigured = "+String(complete)+";\n"+
+ "export const appCheckSiteKey = "+JSON.stringify(process.env.FIREBASE_APPCHECK_SITE_KEY||"")+";\n");
 console.log("Built Wurld Portfolio to dist/");
