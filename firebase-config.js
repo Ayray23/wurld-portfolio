@@ -8,4 +8,5 @@ export const firebaseConfig = {
   messagingSenderId: "REPLACE_WITH_MESSAGING_SENDER_ID",
   appId: "REPLACE_WITH_APP_ID"
 };
+export const appCheckSiteKey = "";
 export const firebaseConfigured = !Object.values(firebaseConfig).some(v => String(v).startsWith("REPLACE_WITH"));
